@@ -1,0 +1,2 @@
+Two tanks were initiated: 'DepthGuru' (I) and 'TeddyBears' (6)
+Game stopped by timeout. Dead heat between 'DepthGuru' (0 hits) and 'TeddyBears' (0 hits)

@@ -1,0 +1,2 @@
+Two tanks were initiated: 'Orihalk' (7) and 'Tatukrus' (O)
+Game stopped by timeout. Dead heat between 'Orihalk' (0 hits) and 'Tatukrus' (0 hits)

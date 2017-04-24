@@ -1,0 +1,2 @@
+Two tanks were initiated: 'Alma' (L) and 'ByteCat' (3)
+Game stopped by timeout. Dead heat between 'Alma' (0 hits) and 'ByteCat' (0 hits)
