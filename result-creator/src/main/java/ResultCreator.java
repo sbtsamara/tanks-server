@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,10 +10,15 @@ import java.util.stream.Collectors;
 public class ResultCreator {
 
     private static final Runtime runtime = Runtime.getRuntime();
+    private static Path server;
 
     public static void main(String[] args) throws IOException, InterruptedException {
-        List<Path> bots = Files.walk(Paths.get("work/"))
-                .filter(path -> path.getFileName().toString().endsWith(".jar") && !path.getFileName().toString().equals("server.jar"))
+        Path work = Paths.get("work");
+        Files.walk(work)
+                .filter(path -> path.getFileName().toString().startsWith("tanks-server"))
+                .findAny().ifPresent(path -> server = path);
+        List<Path> bots = Files.walk(work)
+                .filter(path -> path.getFileName().toString().endsWith(".jar") && !path.equals(server))
                 .collect(Collectors.toList());
         bots.forEach(bot -> bots.subList(bots.indexOf(bot) + 1, bots.size()).forEach(enemy -> game(bot, enemy)));
         writeResult();
@@ -20,14 +26,30 @@ public class ResultCreator {
 
     private static void game(Path bot1, Path bot2) {
         try {
-            Process server = runtime.exec("java -jar work/server.jar");
+            Process serverProcess = runtime.exec("java -jar " + server.toFile().getAbsolutePath());
             TimeUnit.SECONDS.sleep(1);
-            runtime.exec("java -jar " + bot1.toFile().getAbsolutePath());
-            runtime.exec("java -jar " + bot2.toFile().getAbsolutePath());
-            server.waitFor();
+            Process bot1Process = runtime.exec("java -jar " + bot1.toFile().getAbsolutePath());
+            Process bot2Process = runtime.exec("java -jar " + bot2.toFile().getAbsolutePath());
+            readInputStream(bot1Process.getInputStream());
+            readInputStream(bot2Process.getInputStream());
+            readInputStream(bot1Process.getErrorStream());
+            readInputStream(bot2Process.getErrorStream());
+            serverProcess.waitFor();
         }catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private static void readInputStream(InputStream stream) {
+        new Thread(() -> {
+            try {
+                while (stream.read() != -1) {
+                    stream.read();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     private static void writeResult() throws IOException {

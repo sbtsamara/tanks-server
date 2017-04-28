@@ -77,7 +77,7 @@ public class World implements TankExplodeListener {
 
     private Tank createRandomTank(String name) {
         Tank tank = new Tank(this, IdHelper.getId(name), name, currentColor, random.nextInt(3));
-        tank.moveTo(getPosition());
+        tank.moveTo(getPosition(tank));
         currentColor = currentColor < 2 ? currentColor + 1 : 0;
         return tank;
     }
@@ -146,7 +146,7 @@ public class World implements TankExplodeListener {
                 FieldHelper.clearCell(field, tank.getX() + j, tank.getY() + i);
             }
         }
-        tank.moveTo(getPosition());
+        tank.moveTo(getPosition(tank));
         owner.incrementHits();
         logHelper.write("Tank " + owner.getName() + " hit tank " + tank.getName());
 
@@ -168,9 +168,16 @@ public class World implements TankExplodeListener {
         throw new IllegalArgumentException();
     }
 
-    private Vector2 getPosition() {
+    private Vector2 getPosition(Tank thisTank) {
         if (getTanks().size() == 0) {
             return new Vector2(0, 0);
+        }
+        Optional<Tank> tankOptional = getTanks().stream().filter((tank -> !tank.equals(thisTank))).findAny();
+        if(tankOptional.isPresent()) {
+            Tank anotherTank = tankOptional.get();
+            float x = anotherTank.getX() < FIELD_WIDTH / 2 ? FIELD_WIDTH - Tank.SIZE : 0;
+            float y = anotherTank.getY() < FIELD_HEIGHT / 2 ? FIELD_HEIGHT - Tank.SIZE : 0;
+            return new Vector2(x, y);
         }
         return new Vector2(FIELD_WIDTH - Tank.SIZE, FIELD_HEIGHT - Tank.SIZE);
     }
